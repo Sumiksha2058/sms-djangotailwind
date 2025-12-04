@@ -53,7 +53,7 @@ class AnalyticsListView(TemplateView):
         for subject in subjects:
             results = Result.objects.filter(subject=subject)
             if results.exists():
-                avg = results.aggregate(avg_marks=models.Avg("percentage"))["avg_marks"]
+                avg = results.aggregate(avg_marks=Subject.Avg("percentage"))["avg_marks"]
             else:
                 avg = 0
             subject_labels.append(subject.name)
@@ -488,3 +488,21 @@ class ResultDeleteView(DeleteView):
         context['model_name'] = 'result'
         context['detail_url_name'] = 'result_detail'
         return context
+
+def student_prediction(request, pk):
+    student = Student.objects.get(pk=pk)
+
+    attendance_total = student.attendance_set.count()
+    attendance_present = student.attendance_set.filter(status="Present").count()
+    attendance_percentage = (attendance_present / attendance_total * 100) if attendance_total > 0 else 0
+
+    avg_marks = Result.objects.filter(student=student).aggregate(Avg("marks_obtained"))["marks_obtained__avg"] or 0
+
+    prediction = predict_pass_fail(attendance_percentage, avg_marks)
+
+    return JsonResponse({
+        "student": student.student_id,
+        "attendance": attendance_percentage,
+        "avg_marks": avg_marks,
+        "prediction": "Pass" if prediction == 1 else "Fail"
+    })

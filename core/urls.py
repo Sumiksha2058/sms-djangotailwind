@@ -8,7 +8,7 @@ from .views import (
     TeacherListView, TeacherDetailView, TeacherCreateView, TeacherUpdateView, TeacherDeleteView,
     AttendanceListView, AttendanceDetailView, AttendanceCreateView, AttendanceUpdateView, AttendanceDeleteView,
     AssignmentListView, AssignmentDetailView, AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView,
-    ResultListView, ResultDetailView, ResultCreateView, ResultUpdateView, ResultDeleteView, home, AnalyticsListView
+    ResultListView, ResultDetailView, ResultCreateView, ResultUpdateView, ResultDeleteView, home, AnalyticsListView, student_prediction
 )
 
 urlpatterns = [
@@ -34,6 +34,8 @@ urlpatterns = [
     path('subjects/new/', SubjectCreateView.as_view(), name='subject_create'),
     path('subjects/<int:pk>/edit/', SubjectUpdateView.as_view(), name='subject_update'),
     path('subjects/<int:pk>/delete/', SubjectDeleteView.as_view(), name='subject_delete'),
+    path("student/<int:pk>/prediction/", student_prediction, name="student_prediction"),
+
 
     # Teacher URLs
     path('teachers/', TeacherListView.as_view(), name='teacher_list'),
