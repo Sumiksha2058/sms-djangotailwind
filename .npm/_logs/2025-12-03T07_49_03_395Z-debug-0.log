@@ -1,0 +1,26 @@
+0 verbose cli /home/ubuntu/.nvm/versions/node/v22.13.0/bin/node /home/ubuntu/.nvm/versions/node/v22.13.0/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.13.0
+3 silly config load:file:/home/ubuntu/.nvm/versions/node/v22.13.0/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/ubuntu/.npmrc
+5 silly config load:file:/home/ubuntu/.nvm/versions/node/v22.13.0/etc/npmrc
+6 verbose title npm exec tailwindcss init -p
+7 verbose argv "exec" "--" "tailwindcss" "init" "-p"
+8 verbose logfile logs-max:10 dir:/home/ubuntu/.npm/_logs/2025-12-03T07_49_03_395Z-
+9 verbose logfile /home/ubuntu/.npm/_logs/2025-12-03T07_49_03_395Z-debug-0.log
+10 silly logfile done cleaning log files
+11 silly packumentCache heap:2116812800 maxSize:529203200 maxEntrySize:264601600
+12 verbose stack Error: could not determine executable to run
+12 verbose stack     at getBinFromManifest (/home/ubuntu/.nvm/versions/node/v22.13.0/lib/node_modules/npm/node_modules/libnpmexec/lib/get-bin-from-manifest.js:17:23)
+12 verbose stack     at exec (/home/ubuntu/.nvm/versions/node/v22.13.0/lib/node_modules/npm/node_modules/libnpmexec/lib/index.js:202:15)
+12 verbose stack     at async Npm.exec (/home/ubuntu/.nvm/versions/node/v22.13.0/lib/node_modules/npm/lib/npm.js:207:9)
+12 verbose stack     at async module.exports (/home/ubuntu/.nvm/versions/node/v22.13.0/lib/node_modules/npm/lib/cli/entry.js:74:5)
+13 verbose pkgid tailwindcss@4.1.17
+14 error could not determine executable to run
+15 verbose cwd /home/ubuntu
+16 verbose os Linux 6.1.102
+17 verbose node v22.13.0
+18 verbose npm  v10.9.2
+19 verbose exit 1
+20 verbose code 1
+21 error A complete log of this run can be found in: /home/ubuntu/.npm/_logs/2025-12-03T07_49_03_395Z-debug-0.log

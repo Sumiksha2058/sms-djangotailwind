@@ -1,0 +1,12 @@
+{
+  "cookiecutter": {
+    "app_name": "theme",
+    "_template": "/usr/local/lib/python3.11/dist-packages/tailwind",
+    "_output_dir": "/home/ubuntu",
+    "_repo_dir": "/usr/local/lib/python3.11/dist-packages/tailwind/app_template_v4_standalone",
+    "_checkout": null
+  },
+  "_cookiecutter": {
+    "app_name": "theme"
+  }
+}
