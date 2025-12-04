@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+
+# Virtual environment
+venv/
+env/
+ENV/
+*.venv/
+
+# VSCode settings
+.vscode/
+
+# Django stuff
+db.sqlite3
+media/
+staticfiles/
+
+# Logs
+*.log
+*.pot
+*.pyc
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables / secrets
+*.env
+.env
+.env.local
+
+# Compiled static files
+static/
+
+# Cache
+.cache/

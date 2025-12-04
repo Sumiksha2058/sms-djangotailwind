@@ -11,28 +11,63 @@ def home(request):
 class AnalyticsListView(TemplateView):
     template_name = "core/analytics.html"
 
+class AnalyticsListView(TemplateView):
+    template_name = "core/analytics.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        total_students =  context["total_students"] = Student.objects.count()
-        total_teachers = context["total_teachers"] = Teacher.objects.count()
+        # --- Basic Counts ---
+        total_students = Student.objects.count()
+        total_teachers = Teacher.objects.count()
+
+        context["total_students"] = total_students
+        context["total_teachers"] = total_teachers
         context["total_courses"] = Course.objects.count()
         context["total_subjects"] = Subject.objects.count()
         context["total_assignments"] = Assignment.objects.count()
         context["total_results"] = Result.objects.count()
         context["total_attendance_records"] = Attendance.objects.count()
 
-        context['avg_attendance'] = 87
-        context['ts_ratio'] = round(total_students / total_teachers, 1)
+        # Teacher : Student Ratio
+        context["ts_ratio"] = round(total_students / total_teachers, 1) if total_teachers else 0
 
-        context['gender_data'] = [male_count, female_count, other_count]
-        context['pass_fail_data'] = [pass_count, fail_count]
+        # --- Gender Statistics (if Student model has gender field) ---
+        male_count = Student.objects.filter(gender="male").count() if hasattr(Student, "gender") else 0
+        female_count = Student.objects.filter(gender="female").count() if hasattr(Student, "gender") else 0
+        other_count = Student.objects.filter(gender="other").count() if hasattr(Student, "gender") else 0
 
-        context['subject_labels'] = ['Math', 'Science', 'English']
-        context['subject_values'] = [78, 82, 74]
+        context["gender_data"] = [male_count, female_count, other_count]
 
+        # --- Result Statistics (Pass/Fail) ---
+        pass_count = Result.objects.filter(percentage__gte=40).count()
+        fail_count = Result.objects.filter(percentage__lt=40).count()
+
+        context["pass_fail_data"] = [pass_count, fail_count]
+
+        # --- Subject-Wise Average Marks ---
+        subjects = Subject.objects.all()
+        subject_labels = []
+        subject_average = []
+
+        for subject in subjects:
+            results = Result.objects.filter(subject=subject)
+            if results.exists():
+                avg = results.aggregate(avg_marks=models.Avg("percentage"))["avg_marks"]
+            else:
+                avg = 0
+            subject_labels.append(subject.name)
+            subject_average.append(round(avg, 2))
+
+        context["subject_labels"] = subject_labels
+        context["subject_values"] = subject_average
+
+        # --- Example Avg Attendance ---
+        # (Replace with your real logic later)
+        context["avg_attendance"] = 87  
 
         return context
+
 
 # --- Course CRUD ---
 class CourseListView(ListView):
