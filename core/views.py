@@ -1,17 +1,15 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from django.urls import reverse_lazy
-from .models import Course, Student, Subject, Teacher, User, UserProfile, Assignment, Attendance, Result  
+from .models import Course, Student, Subject, Teacher, User, UserProfile, Assignment, Attendance, Result 
+from .mixins import AdminOnlyMixin, StaffAndAdminMixin, StudentAndAdminMixin, ParentAndAdminMixin, StudentOwnerMixin  
 
 def home(request):
     return render(request, 'home.html')
 
 # --- Dashboard Analylis  ---
 
-class AnalyticsListView(TemplateView):
-    template_name = "core/analytics.html"
-
-class AnalyticsListView(TemplateView):
+class AnalyticsListView(AdminOnlyMixin, TemplateView):
     template_name = "core/analytics.html"
 
     def get_context_data(self, **kwargs):
@@ -70,7 +68,7 @@ class AnalyticsListView(TemplateView):
 
 
 # --- Course CRUD ---
-class CourseListView(ListView):
+class CourseListView(AdminOnlyMixin, ListView):
     model = Course
     template_name = 'core/generic_list.html'
     context_object_name = 'object_list'
@@ -86,12 +84,12 @@ class CourseListView(ListView):
         context['delete_url_name'] = 'course_delete'
         return context
 
-class CourseDetailView(DetailView):
+class CourseDetailView(AdminOnlyMixin, DetailView):
     model = Course
     template_name = 'core/course_detail.html'
     context_object_name = 'course'
 
-class CourseCreateView(CreateView):
+class CourseCreateView(AdminOnlyMixin, CreateView):
     model = Course
     template_name = 'core/generic_form.html'
     fields = ['name', 'code', 'semester', 'section', 'capacity', 'description', 'class_teacher']
@@ -103,7 +101,7 @@ class CourseCreateView(CreateView):
         context['list_url_name'] = 'course_list'
         return context
 
-class CourseUpdateView(UpdateView):
+class CourseUpdateView(AdminOnlyMixin, UpdateView):
     model = Course
     template_name = 'core/generic_form.html'
     fields = ['name', 'code', 'semester', 'section', 'capacity', 'description', 'class_teacher']
@@ -115,7 +113,7 @@ class CourseUpdateView(UpdateView):
         context['list_url_name'] = 'course_list'
         return context
 
-class CourseDeleteView(DeleteView):
+class CourseDeleteView(AdminOnlyMixin, DeleteView):
     model = Course
     template_name = 'core/generic_confirm_delete.html'
     success_url = reverse_lazy('course_list')
@@ -128,6 +126,44 @@ class CourseDeleteView(DeleteView):
 
 # --- Student CRUD ---
 class StudentListView(ListView):
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return self.model.objects.none()
+
+        try:
+            profile = user.userprofile
+        except:
+            return self.model.objects.none()
+
+        if profile.role == 'admin':
+            return self.model.objects.all()
+        
+        elif profile.role == 'teacher':
+            from .models import Teacher, Course # Import locally to avoid circular dependency if needed
+            try:
+                teacher = Teacher.objects.get(user_profile=profile)
+                # Assuming a teacher can only see students in courses they teach
+                taught_courses = Course.objects.filter(class_teacher=teacher)
+                return self.model.objects.filter(course__in=taught_courses)
+            except Teacher.DoesNotExist:
+                return self.model.objects.none()
+
+        elif profile.role == 'student':
+            # Student only sees their own record
+            return self.model.objects.filter(user_profile=profile)
+
+        elif profile.role == 'parent':
+            from .models import Parent # Import locally
+            try:
+                parent = Parent.objects.get(user_profile=profile)
+                # Parent only sees their children
+                return self.model.objects.filter(parent=parent)
+            except Parent.DoesNotExist:
+                return self.model.objects.none()
+
+        return self.model.objects.none()
     model = Student
     template_name = 'core/generic_list.html'
     context_object_name = 'object_list'
@@ -146,7 +182,7 @@ class StudentListView(ListView):
 
 
 
-class StudentDetailView(DetailView):
+class StudentDetailView(StudentOwnerMixin, DetailView):
     model = Student
     template_name = 'core/student_detail.html'
     context_object_name = 'student'
@@ -172,7 +208,7 @@ class StudentCreateView(CreateView):
         form.instance.user_profile = user.userprofile
         return super().form_valid(form)
 
-class StudentUpdateView(UpdateView):
+class StudentUpdateView(StudentSelfUpdateMixin, UpdateView):
     model = Student
     template_name = 'core/generic_form.html'
     fields = ['student_id', 'roll_number', 'course', 'date_of_birth', 'address', 'city', 'state', 'pin_code', 'parent', 'admission_date', 'status']
@@ -196,28 +232,43 @@ class StudentDeleteView(DeleteView):
         return context
 
 # --- Subject CRUD ---
-class SubjectListView(ListView):
-    model = Subject
+class TeacherListView(StaffAndAdminMixin, ListView):
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return self.model.objects.none()
+
+        try:
+            profile = user.userprofile
+        except:
+            return self.model.objects.none()
+
+        if profile.role == 'admin' or profile.role == 'teacher':
+            return self.model.objects.all()
+        
+        return self.model.objects.none()
+    model = Teacher
     template_name = 'core/generic_list.html'
     context_object_name = 'object_list'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['model_name'] = 'subject'
-        context['headers'] = ['Name', 'Code', 'Credits']
-        context['fields'] = ['name', 'code', 'credits']
-        context['detail_url_name'] = 'subject_detail'
-        context['create_url_name'] = 'subject_create'
-        context['update_url_name'] = 'subject_update'
-        context['delete_url_name'] = 'subject_delete'
+        context['model_name'] = 'teacher'
+        context['headers'] = ['Employee ID', 'Qualification', 'Department']
+        context['fields'] = ['employee_id', 'qualification', 'department']
+        context['detail_url_name'] = 'teacher_detail'
+        context['create_url_name'] = 'teacher_create'
+        context['update_url_name'] = 'teacher_update'
+        context['delete_url_name'] = 'teacher_delete'
         return context
 
-class SubjectDetailView(DetailView):
+class SubjectDetailView(AdminOnlyMixin, DetailView):
     model = Subject
     template_name = 'core/subject_detail.html'
     context_object_name = 'subject'
 
-class SubjectCreateView(CreateView):
+class SubjectCreateView(AdminOnlyMixin, CreateView):
     model = Subject
     template_name = 'core/generic_form.html'
     fields = ['name', 'code', 'credits', 'description']
@@ -229,7 +280,7 @@ class SubjectCreateView(CreateView):
         context['list_url_name'] = 'subject_list'
         return context
 
-class SubjectUpdateView(UpdateView):
+class SubjectUpdateView(AdminOnlyMixin, UpdateView):
     model = Subject
     template_name = 'core/generic_form.html'
     fields = ['name', 'code', 'credits', 'description']
@@ -241,7 +292,7 @@ class SubjectUpdateView(UpdateView):
         context['list_url_name'] = 'subject_list'
         return context
 
-class SubjectDeleteView(DeleteView):
+class SubjectDeleteView(AdminOnlyMixin, DeleteView):
     model = Subject
     template_name = 'core/generic_confirm_delete.html'
     success_url = reverse_lazy('subject_list')
@@ -269,7 +320,7 @@ class TeacherListView(ListView):
         context['delete_url_name'] = 'teacher_delete'
         return context
 
-class TeacherDetailView(DetailView):
+class TeacherDetailView(TeacherSelfAccessMixin, DetailView):
     model = Teacher
     template_name = 'core/teacher_detail.html'
     context_object_name = 'teacher'
@@ -295,7 +346,7 @@ class TeacherCreateView(CreateView):
         form.instance.user_profile = user.userprofile
         return super().form_valid(form)
 
-class TeacherUpdateView(UpdateView):
+class TeacherUpdateView(TeacherSelfAccessMixin, UpdateView):
     model = Teacher
     template_name = 'core/generic_form.html'
     fields = ['employee_id', 'qualification', 'specialization', 'joining_date', 'department']
@@ -319,7 +370,7 @@ class TeacherDeleteView(DeleteView):
         return context
 
 # --- Attendance CRUD ---
-class AttendanceListView(ListView):
+class AttendanceListView(AdminOnlyMixin, ListView):
     model = Attendance
     template_name = 'core/generic_list.html'
     context_object_name = 'object_list'
@@ -335,12 +386,12 @@ class AttendanceListView(ListView):
         context['delete_url_name'] = 'attendance_delete'
         return context
 
-class AttendanceDetailView(DetailView):
+class AttendanceDetailView(AdminOnlyMixin, DetailView):
     model = Attendance
     template_name = 'core/attendance_detail.html'
     context_object_name = 'attendance'
 
-class AttendanceCreateView(CreateView):
+class AttendanceCreateView(AdminOnlyMixin, CreateView):
     model = Attendance
     template_name = 'core/generic_form.html'
     fields = ['student', 'subject', 'attendance_date', 'status', 'remarks']
@@ -352,7 +403,7 @@ class AttendanceCreateView(CreateView):
         context['list_url_name'] = 'attendance_list'
         return context
 
-class AttendanceUpdateView(UpdateView):
+class AttendanceUpdateView(AdminOnlyMixin, UpdateView):
     model = Attendance
     template_name = 'core/generic_form.html'
     fields = ['student', 'subject', 'attendance_date', 'status', 'remarks']
@@ -364,7 +415,7 @@ class AttendanceUpdateView(UpdateView):
         context['list_url_name'] = 'attendance_list'
         return context
 
-class AttendanceDeleteView(DeleteView):
+class AttendanceDeleteView(AdminOnlyMixin, DeleteView):
     model = Attendance
     template_name = 'core/generic_confirm_delete.html'
     success_url = reverse_lazy('attendance_list')
@@ -376,7 +427,7 @@ class AttendanceDeleteView(DeleteView):
         return context
 
 # --- Assignment CRUD ---
-class AssignmentListView(ListView):
+class AssignmentListView(AdminOnlyMixin, ListView):
     model = Assignment
     template_name = 'core/generic_list.html'
     context_object_name = 'object_list'
@@ -392,12 +443,12 @@ class AssignmentListView(ListView):
         context['delete_url_name'] = 'assignment_delete'
         return context
 
-class AssignmentDetailView(DetailView):
+class AssignmentDetailView(AdminOnlyMixin, DetailView):
     model = Assignment
     template_name = 'core/assignment_detail.html'
     context_object_name = 'assignment'
 
-class AssignmentCreateView(CreateView):
+class AssignmentCreateView(AdminOnlyMixin, CreateView):
     model = Assignment
     template_name = 'core/generic_form.html'
     fields = ['subject', 'teacher', 'title', 'description', 'due_date', 'total_marks']
@@ -409,7 +460,7 @@ class AssignmentCreateView(CreateView):
         context['list_url_name'] = 'assignment_list'
         return context
 
-class AssignmentUpdateView(UpdateView):
+class AssignmentUpdateView(AdminOnlyMixin, UpdateView):
     model = Assignment
     template_name = 'core/generic_form.html'
     fields = ['subject', 'teacher', 'title', 'description', 'due_date', 'total_marks']
@@ -421,7 +472,7 @@ class AssignmentUpdateView(UpdateView):
         context['list_url_name'] = 'assignment_list'
         return context
 
-class AssignmentDeleteView(DeleteView):
+class AssignmentDeleteView(AdminOnlyMixin, DeleteView):
     model = Assignment
     template_name = 'core/generic_confirm_delete.html'
     success_url = reverse_lazy('assignment_list')
@@ -433,7 +484,7 @@ class AssignmentDeleteView(DeleteView):
         return context
 
 # --- Result CRUD ---
-class ResultListView(ListView):
+class ResultListView(AdminOnlyMixin, ListView):
     model = Result
     template_name = 'core/generic_list.html'
     context_object_name = 'object_list'
@@ -449,12 +500,12 @@ class ResultListView(ListView):
         context['delete_url_name'] = 'result_delete'
         return context
 
-class ResultDetailView(DetailView):
+class ResultDetailView(AdminOnlyMixin, DetailView):
     model = Result
     template_name = 'core/result_detail.html'
     context_object_name = 'result'
 
-class ResultCreateView(CreateView):
+class ResultCreateView(AdminOnlyMixin, CreateView):
     model = Result
     template_name = 'core/generic_form.html'
     fields = ['student', 'subject', 'exam', 'marks_obtained', 'total_marks', 'percentage', 'grade', 'remarks']
@@ -466,7 +517,7 @@ class ResultCreateView(CreateView):
         context['list_url_name'] = 'result_list'
         return context
 
-class ResultUpdateView(UpdateView):
+class ResultUpdateView(AdminOnlyMixin, UpdateView):
     model = Result
     template_name = 'core/generic_form.html'
     fields = ['student', 'subject', 'exam', 'marks_obtained', 'total_marks', 'percentage', 'grade', 'remarks']
@@ -478,7 +529,7 @@ class ResultUpdateView(UpdateView):
         context['list_url_name'] = 'result_list'
         return context
 
-class ResultDeleteView(DeleteView):
+class ResultDeleteView(AdminOnlyMixin, DeleteView):
     model = Result
     template_name = 'core/generic_confirm_delete.html'
     success_url = reverse_lazy('result_list')
