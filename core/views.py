@@ -190,7 +190,7 @@ class StudentDetailView(StudentOwnerMixin, DetailView):
 class StudentCreateView(CreateView):
     model = Student
     template_name = 'core/generic_form.html'
-    fields = ['student_id', 'roll_number', 'course', 'date_of_birth', 'address', 'city', 'state', 'pin_code', 'parent', 'admission_date', 'status']
+    fields = ['user_profile', 'student_id', 'roll_number', 'course', 'date_of_birth', 'address', 'city', 'state', 'pin_code', 'parent', 'admission_date', 'status']
     success_url = reverse_lazy('student_list')
 
     def get_context_data(self, **kwargs):
@@ -199,19 +199,12 @@ class StudentCreateView(CreateView):
         context['list_url_name'] = 'student_list'
         return context
 
-    def form_valid(self, form):
-        # Create a new Django User and UserProfile for the student
-        # This is a simplified approach, in a real app, this would be more complex
-        username = f"student_{form.instance.roll_number}"
-        user = User.objects.create_user(username=username, email=f"{username}@sms.com", password='password')
-        UserProfile.objects.create(user=user, role='student')
-        form.instance.user_profile = user.userprofile
-        return super().form_valid(form)
+
 
 class StudentUpdateView(StudentSelfUpdateMixin, UpdateView):
     model = Student
     template_name = 'core/generic_form.html'
-    fields = ['student_id', 'roll_number', 'course', 'date_of_birth', 'address', 'city', 'state', 'pin_code', 'parent', 'admission_date', 'status']
+    fields = ['user_profile', 'student_id', 'roll_number', 'course', 'date_of_birth', 'address', 'city', 'state', 'pin_code', 'parent', 'admission_date', 'status']
     success_url = reverse_lazy('student_list')
 
     def get_context_data(self, **kwargs):
@@ -328,7 +321,7 @@ class TeacherDetailView(TeacherSelfAccessMixin, DetailView):
 class TeacherCreateView(CreateView):
     model = Teacher
     template_name = 'core/generic_form.html'
-    fields = ['employee_id', 'qualification', 'specialization', 'joining_date', 'department']
+    fields = ['user_profile', 'employee_id', 'qualification', 'specialization', 'joining_date', 'department']
     success_url = reverse_lazy('teacher_list')
 
     def get_context_data(self, **kwargs):
@@ -337,19 +330,12 @@ class TeacherCreateView(CreateView):
         context['list_url_name'] = 'teacher_list'
         return context
 
-    def form_valid(self, form):
-        # Create a new Django User and UserProfile for the teacher
-        # This is a simplified approach, in a real app, this would be more complex
-        username = f"teacher_{form.instance.employee_id}"
-        user = User.objects.create_user(username=username, email=f"{username}@sms.com", password='password')
-        UserProfile.objects.create(user=user, role='teacher')
-        form.instance.user_profile = user.userprofile
-        return super().form_valid(form)
+
 
 class TeacherUpdateView(TeacherSelfAccessMixin, UpdateView):
     model = Teacher
     template_name = 'core/generic_form.html'
-    fields = ['employee_id', 'qualification', 'specialization', 'joining_date', 'department']
+    fields = ['user_profile', 'employee_id', 'qualification', 'specialization', 'joining_date', 'department']
     success_url = reverse_lazy('teacher_list')
 
     def get_context_data(self, **kwargs):
