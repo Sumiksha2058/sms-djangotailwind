@@ -1,117 +1,98 @@
-{% load static tailwind_tags %}
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Student Management System | Analytics{% endblock %}</title>
-    {% tailwind_css %}
+    <title>{% block title %}Student Management System{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
+
 <body class="bg-gray-100 font-sans antialiased">
+
+    <!-- NAVBAR -->
     <nav class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
+
+                <!-- LEFT SECTION -->
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
                         <a href="{% url 'home' %}" class="text-xl font-bold text-indigo-600">SMS</a>
                     </div>
+
+                    <!-- MAIN NAV LINKS -->
+                    {% if user.is_authenticated %}
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="{% url 'home' %}" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</a>
-                        <a href="{% url 'student_list' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Students</a>
-                        <a href="{% url 'course_list' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Courses</a>
-                        <a href="{% url 'teacher_list' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Teachers</a>
-                        <a href="{% url 'subject_list' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Subjects</a>
-                        <a href="{% url 'attendance_list' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Attendance</a>
-                        <a href="{% url 'assignment_list' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Assignments</a>
-                        <a href="{% url 'result_list' %}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Results</a>
-                        {% comment %} <a href="{% url 'analytics' %}" class="border-transparent text-indigo-600 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Analytics</a> {% endcomment %}
+
+                        <!-- ADMIN MENU -->
+                        {% if user.role == 'ADMIN' %}
+                            <a href="{% url 'home' %}" class="nav-item-active">Dashboard</a>
+                            <a href="{% url 'student_list' %}" class="nav-item">Students</a>
+                            <a href="{% url 'course_list' %}" class="nav-item">Courses</a>
+                            <a href="{% url 'teacher_list' %}" class="nav-item">Teachers</a>
+                            <a href="{% url 'subject_list' %}" class="nav-item">Subjects</a>
+                            <a href="{% url 'attendance_list' %}" class="nav-item">Attendance</a>
+                            <a href="{% url 'assignment_list' %}" class="nav-item">Assignments</a>
+                            <a href="{% url 'result_list' %}" class="nav-item">Results</a>
+                        {% endif %}
+
+                        <!-- TEACHER MENU -->
+                        {% if user.role == 'TEACHER' %}
+                            <a href="{% url 'home' %}" class="nav-item-active">Dashboard</a>
+                            <a href="{% url 'teacher_courses' %}" class="nav-item">My Courses</a>
+                            <a href="{% url 'attendance_mark' %}" class="nav-item">Mark Attendance</a>
+                            <a href="{% url 'teacher_assignments' %}" class="nav-item">Assignments</a>
+                        {% endif %}
+
+                        <!-- STUDENT MENU -->
+                        {% if user.role == 'STUDENT' %}
+                            <a href="{% url 'home' %}" class="nav-item-active">Dashboard</a>
+                            <a href="{% url 'student_assignments' %}" class="nav-item">Assignments</a>
+                            <a href="{% url 'student_results' %}" class="nav-item">Results</a>
+                            <a href="{% url 'student_attendance' %}" class="nav-item">Attendance</a>
+                        {% endif %}
+
+                        <!-- PARENT MENU -->
+                        {% if user.role == 'PARENT' %}
+                            <a href="{% url 'home' %}" class="nav-item-active">Dashboard</a>
+                            <a href="{% url 'parent_children' %}" class="nav-item">Child Performance</a>
+                        {% endif %}
+
                     </div>
+                    {% endif %}
                 </div>
+
+                <!-- RIGHT SECTION -->
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
                     {% if user.is_authenticated %}
-                        <span class="text-sm font-medium text-gray-700">{{ user.username }}</span>
-                        <a href="{% url 'logout' %}" class="ml-4 text-sm font-medium text-red-600 hover:text-red-800">Logout</a>
+                        <span class="text-sm font-medium text-gray-700">{{ user.username }} ({{ user.role }})</span>
+                        <a href="{% url 'logout' %}" 
+                           class="ml-4 text-sm font-semibold text-red-600 hover:text-red-800">Logout</a>
                     {% else %}
-                        <a href="{% url 'login' %}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Login</a>
+                        <a href="{% url 'login' %}" 
+                           class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Login</a>
+                        <a href="{% url 'register' %}" 
+                           class="ml-4 text-sm font-medium text-green-600 hover:text-green-800">Register</a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
 
+    <!-- PAGE CONTENT -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {% block content %}
-        
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Analytics Overview</h1>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <h2 class="text-lg font-semibold text-gray-600">Total Students</h2>
-                <p class="mt-2 text-3xl font-bold text-indigo-600">{{ total_students }}</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <h2 class="text-lg font-semibold text-gray-600">Total Teachers</h2>
-                <p class="mt-2 text-3xl font-bold text-indigo-600">{{ total_teachers }}</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <h2 class="text-lg font-semibold text-gray-600">Courses Offered</h2>
-                <p class="mt-2 text-3xl font-bold text-indigo-600">{{ total_courses }}</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <h2 class="text-lg font-semibold text-gray-600">Subjects</h2>
-                <p class="mt-2 text-3xl font-bold text-indigo-600">{{ total_subjects }}</p>
-            </div>
-        </div>
-
-        <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4">Attendance Trend</h2>
-                <canvas id="attendanceChart"></canvas>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4">Student Enrollment Growth</h2>
-                <canvas id="studentChart"></canvas>
-            </div>
-        </div>
-    
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            const attendanceCtx = document.getElementById('attendanceChart');
-            new Chart(attendanceCtx, {
-                type: 'line',
-                data: {
-                    labels: {{ attendance_labels|safe }},
-                    datasets: [{
-                        label: 'Attendance %',
-                        data: {{ attendance_values|safe }},
-                        borderWidth: 2,
-                        borderColor: 'rgba(99, 102, 241, 1)',
-                        fill: false
-                    }]
-                }
-            });
-
-            const studentCtx = document.getElementById('studentChart');
-            new Chart(studentCtx, {
-                type: 'bar',
-                data: {
-                    labels: {{ student_growth_labels|safe }},
-                    datasets: [{
-                        label: 'Students',
-                        data: {{ student_growth_values|safe }},
-                        backgroundColor: 'rgba(79, 70, 229, 0.7)'
-                    }]
-                }
-            });
-        </script>
-
         {% endblock %}
     </main>
 
+    <!-- FOOTER -->
     <footer class="mt-12 py-4 text-center text-gray-500 text-sm">
         &copy; {% now "Y" %} Student Management System. All rights reserved.
     </footer>
+
 </body>
 </html>

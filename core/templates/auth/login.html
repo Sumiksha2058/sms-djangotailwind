@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded">
+    <h2 class="text-xl font-bold mb-4">Login</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <button type="submit"
+            class="w-full mt-4 bg-indigo-600 text-white py-2 rounded">
+            Login
+        </button>
+    </form>
+
+    <p class="mt-4 text-sm text-center">
+        Don’t have an account?
+        <a href="{% url 'register' %}" class="text-indigo-600">Register</a>
+    </p>
+</div>
+{% endblock %}

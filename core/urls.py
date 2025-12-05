@@ -67,4 +67,10 @@ urlpatterns = [
 
     # Analytics URLs
     path("analytics/", AnalyticsListView.as_view(), name="analytics"),
+
+    
+    # Authentication
+    path('login/', views.CustomLoginView.as_view(), name='login'),
+    path('register/', views.register, name='register'),
+    path('logout/', views.custom_logout, name='logout'),
 ]
