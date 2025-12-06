@@ -1,98 +1,21 @@
-{% load static %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Student Management System{% endblock %}</title>
+{% block title %}Home | Student Management System{% endblock %}
 
-    <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
-</head>
+{% block content %}
+<div class="bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Welcome to the Student Management System</h1>
 
-<body class="bg-gray-100 font-sans antialiased">
-
-    <!-- NAVBAR -->
-    <nav class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-
-                <!-- LEFT SECTION -->
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="{% url 'home' %}" class="text-xl font-bold text-indigo-600">SMS</a>
-                    </div>
-
-                    <!-- MAIN NAV LINKS -->
-                    {% if user.is_authenticated %}
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-
-                        <!-- ADMIN MENU -->
-                        {% if user.role == 'ADMIN' %}
-                            <a href="{% url 'home' %}" class="nav-item-active">Dashboard</a>
-                            <a href="{% url 'student_list' %}" class="nav-item">Students</a>
-                            <a href="{% url 'course_list' %}" class="nav-item">Courses</a>
-                            <a href="{% url 'teacher_list' %}" class="nav-item">Teachers</a>
-                            <a href="{% url 'subject_list' %}" class="nav-item">Subjects</a>
-                            <a href="{% url 'attendance_list' %}" class="nav-item">Attendance</a>
-                            <a href="{% url 'assignment_list' %}" class="nav-item">Assignments</a>
-                            <a href="{% url 'result_list' %}" class="nav-item">Results</a>
-                        {% endif %}
-
-                        <!-- TEACHER MENU -->
-                        {% if user.role == 'TEACHER' %}
-                            <a href="{% url 'home' %}" class="nav-item-active">Dashboard</a>
-                            <a href="{% url 'teacher_courses' %}" class="nav-item">My Courses</a>
-                            <a href="{% url 'attendance_mark' %}" class="nav-item">Mark Attendance</a>
-                            <a href="{% url 'teacher_assignments' %}" class="nav-item">Assignments</a>
-                        {% endif %}
-
-                        <!-- STUDENT MENU -->
-                        {% if user.role == 'STUDENT' %}
-                            <a href="{% url 'home' %}" class="nav-item-active">Dashboard</a>
-                            <a href="{% url 'student_assignments' %}" class="nav-item">Assignments</a>
-                            <a href="{% url 'student_results' %}" class="nav-item">Results</a>
-                            <a href="{% url 'student_attendance' %}" class="nav-item">Attendance</a>
-                        {% endif %}
-
-                        <!-- PARENT MENU -->
-                        {% if user.role == 'PARENT' %}
-                            <a href="{% url 'home' %}" class="nav-item-active">Dashboard</a>
-                            <a href="{% url 'parent_children' %}" class="nav-item">Child Performance</a>
-                        {% endif %}
-
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- RIGHT SECTION -->
-                <div class="hidden sm:ml-6 sm:flex sm:items-center">
-                    {% if user.is_authenticated %}
-                        <span class="text-sm font-medium text-gray-700">{{ user.username }} ({{ user.role }})</span>
-                        <a href="{% url 'logout' %}" 
-                           class="ml-4 text-sm font-semibold text-red-600 hover:text-red-800">Logout</a>
-                    {% else %}
-                        <a href="{% url 'login' %}" 
-                           class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Login</a>
-                        <a href="{% url 'register' %}" 
-                           class="ml-4 text-sm font-medium text-green-600 hover:text-green-800">Register</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- PAGE CONTENT -->
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {% block content %}
-        {% endblock %}
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="mt-12 py-4 text-center text-gray-500 text-sm">
-        &copy; {% now "Y" %} Student Management System. All rights reserved.
-    </footer>
-
-</body>
-</html>
+    {% if user.is_authenticated %}
+        <p class="text-gray-600 mb-4">
+            You are logged in as <strong>{{ user.username }}</strong>.
+            Use the navigation bar above to access your dashboard, courses, attendance, results, and more.
+        </p>
+    {% else %}
+        <p class="text-gray-600 mb-4">
+            Please <a href="{% url 'login' %}" class="text-indigo-600 font-semibold">login</a> 
+            or <a href="{% url 'register' %}" class="text-green-600 font-semibold">register</a>.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

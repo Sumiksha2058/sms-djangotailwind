@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="bg-white shadow-lg rounded-xl p-10 w-full max-w-md">
+
+        <!-- Title -->
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">
+            Create an Account
+        </h2>
+        <p class="text-center text-gray-500 mb-6">
+            Register to access the system
+        </p>
+
+        <!-- Form -->
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div>
+                <label class="block font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" name="username"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                       required>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label class="block font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" name="email"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <!-- Phone -->
+            <div>
+                <label class="block font-medium text-gray-700 mb-1">Phone</label>
+                <input type="text" name="phone"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <!-- Role -->
+            <div>
+                <label class="block font-medium text-gray-700 mb-1">Select Role</label>
+                <select name="role"
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                    <option value="admin">Admin</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                    <option value="parent">Parent</option>
+                    <option value="user">User</option>
+                </select>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="block font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" name="password"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                       required>
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+                <label class="block font-medium text-gray-700 mb-1">Confirm Password</label>
+                <input type="password" name="confirm_password"
+                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                       required>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold transition">
+                Register
+            </button>
+
+            <!-- Already have account -->
+            <p class="text-center text-gray-600 text-sm mt-3">
+                Already have an account?
+                <a href="{% url 'login' %}" class="text-indigo-600 hover:underline">Login</a>
+            </p>
+
+            <!-- Show errors -->
+            {% if form.errors %}
+            <div class="mt-3 p-3 bg-red-100 text-red-700 rounded-lg">
+                {{ form.errors }}
+            </div>
+            {% endif %}
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}
